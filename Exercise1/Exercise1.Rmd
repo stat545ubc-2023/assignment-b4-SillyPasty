@@ -1,0 +1,81 @@
+---
+title: "Assignment b4 Exercise 1"
+output:
+  md_document: default
+  pdf_document: default
+  html_document: default
+---
+# Introduction
+- In this exercise, I analyze the word count in book 'pride pre judice'.
+- I use the stopwords from stopwords package.
+- Plot 2 figures, one is the wordcount including stopwords, 
+  the other one is the wordcount excluding stopwords.
+# Install packages
+```{r}
+# install.packages("janeaustenr")
+# install.packages("dplyr")
+# install.packages("ggplot2")
+# install.packages("tidytext")
+# install.packages("stopwords")
+```
+# Load packages
+```{r}
+
+library(janeaustenr)
+library(dplyr)
+library(ggplot2)
+library(tidytext)
+library(stopwords)
+```
+# Load book and apply filters to reove stopwords.
+```{r}
+# Load a Jane Austen book, for example "Pride and Prejudice"
+text <- tibble(txt = prideprejudice)
+stop_words = tibble(word = stopwords())
+# Convert the text to a tidy data frame
+original_text <- text %>% unnest_tokens(output = word, input = txt)
+filtered_text <- original_text %>% anti_join(stop_words, by = c("word" = "word"))
+```
+# Count the most common words for original text (with stopwords)
+```{r}
+# Count the most common words
+word_counts <- original_text %>%
+  count(word, sort = TRUE)
+
+# Take the top 20 most common words for plotting
+top_words <- word_counts %>%
+  top_n(20, n)
+```
+# Plot the most common words with stopwords
+```{r}
+# Create the plot
+ggplot(top_words, aes(x = reorder(word, n), y = n, fill = word)) +
+  geom_col() +
+  xlab("Word") +
+  ylab("Frequency") +
+  geom_text(aes(label = n), nudge_y = 0.5, hjust = 0) +
+  ggtitle("Top 20 Most Common Words (Including Stop Words)") +
+  coord_flip()
+```
+# Count the most common words for original text (without stopwords)
+```{r}
+# Count the most common words
+word_counts <- filtered_text %>%
+  count(word, sort = TRUE)
+
+# Take the top 20 most common words for plotting
+top_words <- word_counts %>%
+  top_n(20, n)
+```
+# Plot the most common words without stopwords
+
+```{r}
+# Create the plot
+ggplot(top_words, aes(x = reorder(word, n), y = n, fill = word)) +
+  geom_col() +
+  xlab("Word") +
+  ylab("Frequency") +
+  geom_text(aes(label = n), nudge_y = 0.5, hjust = 0) +
+  ggtitle("Top 20 Most Common Words (Excluding Stop Words)") +
+  coord_flip()
+```
